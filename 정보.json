@@ -1,0 +1,20 @@
+[
+  {
+    "name": "청평계곡",
+    "region": "Gyeonggi",
+    "parking": "yes",
+    "lat": 37.738,
+    "lng": 127.310,
+    "depth": "1.5m",
+    "parkingInfo": "주차장 50대 가능"
+  },
+  {
+    "name": "소금강계곡",
+    "region": "Gangwon",
+    "parking": "no",
+    "lat": 37.697,
+    "lng": 128.681,
+    "depth": "2.0m",
+    "parkingInfo": "주차장 없음"
+  }
+]
