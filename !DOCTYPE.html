@@ -4,103 +4,34 @@
   <meta charset="UTF-8">
   <title>계곡 지도 서비스</title>
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      display: flex;
-      height: 100vh;
-    }
-
-    /* 왼쪽 사이드바 */
-    #sidebar {
-      width: 250px;
-      background: #f5f5f5;
-      border-right: 1px solid #ddd;
-      padding: 15px;
-      overflow-y: auto;
-    }
-
-    #sidebar h2 {
-      font-size: 18px;
-      margin-bottom: 10px;
-    }
-
-    #filter-section {
-      margin-bottom: 20px;
-    }
-
-    #filter-section label {
-      display: block;
-      margin: 5px 0 2px;
-      font-weight: bold;
-    }
-
-    #valley-list li {
-      list-style: none;
-      padding: 8px;
-      border-bottom: 1px solid #ddd;
-      cursor: pointer;
-    }
-
-    #valley-list li:hover {
-      background: #e6f0ff;
-    }
-
-    /* 메인 지도 */
-    #map {
-      flex: 1;
-    }
-
-    /* 오른쪽 정보 패널 */
-    #info-panel {
-      width: 300px;
-      background: #fff;
-      border-left: 1px solid #ddd;
-      padding: 15px;
-      overflow-y: auto;
-    }
-
-    #info-panel h2 {
-      margin-top: 0;
-    }
-
-    /* 광고 영역 */
-    #ad-banner {
-      margin-top: 20px;
-      padding: 10px;
-      background: #ffe680;
-      text-align: center;
-      border: 1px dashed #aaa;
-    }
-
-    /* 문의 영역 */
-    #footer {
-      margin-top: 30px;
-      font-size: 14px;
-      color: #666;
-    }
+    body { margin: 0; font-family: Arial, sans-serif; display: flex; height: 100vh; }
+    #sidebar { width: 250px; background: #f5f5f5; border-right: 1px solid #ddd; padding: 15px; overflow-y: auto; }
+    #sidebar h2 { font-size: 18px; margin-bottom: 10px; }
+    #valley-list li { list-style: none; padding: 8px; border-bottom: 1px solid #ddd; cursor: pointer; }
+    #valley-list li:hover { background: #e6f0ff; }
+    #map { flex: 1; }
+    #info-panel { width: 300px; background: #fff; border-left: 1px solid #ddd; padding: 15px; overflow-y: auto; }
+    #info-panel h2 { margin-top: 0; }
+    #ad-banner { margin-top: 20px; padding: 10px; background: #ffe680; text-align: center; border: 1px dashed #aaa; }
+    #footer { margin-top: 30px; font-size: 14px; color: #666; }
   </style>
 </head>
 <body>
   <!-- 왼쪽 사이드바 -->
   <div id="sidebar">
     <h2>검색 필터</h2>
-    <div id="filter-section">
-      <label for="region-filter">지역</label>
-      <select id="region-filter">
-        <option value="all">전체</option>
-        <option value="Gangwon">강원도</option>
-        <option value="Gyeonggi">경기도</option>
-      </select>
-
-      <label for="parking-filter">주차 가능</label>
-      <select id="parking-filter">
-        <option value="all">전체</option>
-        <option value="yes">있음</option>
-        <option value="no">없음</option>
-      </select>
-    </div>
-
+    <label for="region-filter">지역</label>
+    <select id="region-filter">
+      <option value="all">전체</option>
+      <option value="Gangwon">강원도</option>
+      <option value="Gyeonggi">경기도</option>
+    </select>
+    <label for="parking-filter">주차 가능</label>
+    <select id="parking-filter">
+      <option value="all">전체</option>
+      <option value="yes">있음</option>
+      <option value="no">없음</option>
+    </select>
     <h2>계곡 목록</h2>
     <ul id="valley-list"></ul>
   </div>
@@ -112,33 +43,31 @@
   <div id="info-panel">
     <h2>계곡 정보</h2>
     <div id="valley-info">지도에서 계곡을 클릭하세요.</div>
-
-    <div id="ad-banner">
-      📢 광고 배너 자리
-    </div>
-
-    <div id="footer">
-      문의/후원: example@email.com
-    </div>
+    <div id="ad-banner">📢 광고 배너 자리</div>
+    <div id="footer">문의/후원: example@email.com</div>
   </div>
 
   <!-- 네이버 지도 API -->
   <script src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=KH8BiFa1mEc6VAnJWO6QcFhGlL7dRM90ThSGk0aM"></script>
   <script>
+    let valleys = [];
+
     // 지도 초기화
-    var map = new naver.maps.Map('map', {
+    const map = new naver.maps.Map('map', {
       center: new naver.maps.LatLng(37.5665, 126.9780), // 서울 중심
       zoom: 8
     });
 
-    // 샘플 데이터
-    const valleys = [
-      { name: "청평계곡", region: "Gyeonggi", parking: "yes", lat: 37.738, lng: 127.310, depth: "1.5m", parkingInfo: "주차장 50대 가능" },
-      { name: "소금강계곡", region: "Gangwon", parking: "no", lat: 37.697, lng: 128.681, depth: "2.0m", parkingInfo: "주차장 없음" }
-    ];
-
     const markers = [];
-    const infoWindows = [];
+
+    // 데이터 불러오기
+    fetch("정보.json")
+      .then(res => res.json())
+      .then(data => {
+        valleys = data;
+        renderMarkers();
+      })
+      .catch(err => console.error("데이터 불러오기 실패:", err));
 
     function renderMarkers() {
       markers.forEach(m => m.setMap(null));
@@ -147,7 +76,7 @@
       const region = document.getElementById('region-filter').value;
       const parking = document.getElementById('parking-filter').value;
 
-      valleys.forEach((valley, idx) => {
+      valleys.forEach(valley => {
         if ((region === 'all' || valley.region === region) &&
             (parking === 'all' || valley.parking === parking)) {
           const marker = new naver.maps.Marker({
@@ -196,8 +125,6 @@
 
     document.getElementById('region-filter').addEventListener('change', renderMarkers);
     document.getElementById('parking-filter').addEventListener('change', renderMarkers);
-
-    renderMarkers();
   </script>
 </body>
 </html>
